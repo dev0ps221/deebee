@@ -3,6 +3,10 @@ const mysql = require('mysql');
 class DeeBee{
 
 
+  _____registerAction(actionname,callback){
+    this[actionname] = callback
+  }
+
   _tbs(){
     let tbs = [];
     let act = this.__db().query(
@@ -174,12 +178,6 @@ class DeeBee{
     return this._delReq(table,conds);
   }
 
-  ___newMember({name,email,gender,birthday,star_sign,zodiac,planet,password}){
-    let fields = ['name','email','gender','birthday','star_sign','zodiac','planet','password'];
-    let vals   = [`'${name}'`,`'${email}'`,`'${gender}'`,`'${birthday}'`,`'${star_sign}'`,`'${zodiac}'`,`'${planet}'`,`password('${password}')`];
-    let table  = '_members';
-    return this._insertReq(table,fields,vals);
-  }
 
   ___newNotification({member_id,concerned_id,type_}){
     let fields = ['member_id','concerned_id','type'];
@@ -210,14 +208,6 @@ class DeeBee{
         }
         cb(err?err:res)
       }
-    )
-  }
-  ___addMember(data,cb){
-    this.db.query(
-      this.___newMember(
-        data
-      )
-      ,cb
     )
   }
 
