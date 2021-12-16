@@ -187,6 +187,8 @@ class DeeBee{
   }
 
   ___login(user,pass,cb){
+    console.log('login action triggered on deebee')
+    console.log(this.___loginreq(this._getUsersTable(),user,pass))
     this.db.query(
       this.___loginreq(this._getUsersTable(),user,pass)
       ,cb
