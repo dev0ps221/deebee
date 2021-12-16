@@ -27,16 +27,9 @@ class DeeBee{
   }
 
   __db(){
-    const {usr,pss,hst,db} = this.dbcreds
     try{
-      this.db = mysql.createConnection(
-        {
-          host:hst,
-          user:usr,
-          password:pss,
-          database:db
-        }
-      )
+      console.log('creds are ', this.dbcreds)
+      this.db = mysql.createConnection(this.dbcreds)
       this.db.connect(
         err=>{
           try{
