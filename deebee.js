@@ -17,9 +17,20 @@ class DeeBee{
   _setUsersTable(tbl = null){
     this.usersTable = tbl
   }
-
+  _setUsersPasswField(field='password'){
+    this.usersPasswField = field
+  }
+  _getUsersPasswField(){
+    return this.usersPasswField
+  }
   _getUsersTable(tbl){
     return this.usersTable
+  }
+  _setUsersLogField(field='name'){
+    this.usersLogField = field
+  }
+  _getUsersLogField(){
+    return this.usersLogField
   }
 
   _db(){
@@ -151,13 +162,13 @@ class DeeBee{
     return this._updateReq(table,fields_,vals_,conds);
   }
   ___loginreq(table,user,pass){
-    return this._req("select",table,["id","name"],[],[['name','password'],["'"+user+"'",`password('${pass}')`]]);
+    return this._req("select",table,["id",this._getUsersLogField()],[],[[this._getUsersLogField(),this._getUsersPasswField()],["'"+user+"'",`password('${pass}')`]]);
   }
 
   ___delMember(name,id=null){
     let table=this._getUsersTable();
     let conds=[
-      [''+(id?'id':'name')]
+      [''+(id?'id':this._getUsersLogField())]
       ,[''+(id?id:name)]
     ];
     return this._delReq(table,conds);
@@ -230,32 +241,7 @@ class DeeBee{
     this.db.query(req,(err,res)=>{
         if(err)cb(err,null)
         else{
-          this.___profile(
-            id,(e,r)=>{
-              if(e){
-                console.log(e)
-              }else{
-                if(res.length){
-                  res[0].profile_data = r[0]
-                  this.___networks(
-                    id,(er,re)=>{
-                      if(er){
-                        console.log(er)
-                      }else{
-                        res[0].networks = re[0]
-                        this.___friendship(id,(friendship)=>{
-                          res[0].friendship = friendship
-                          cb(res)
-                        })
-                      }
-                    }
-                  )
-                }else{
-                  console.log('not registered')
-                }
-              }
-            }
-          )
+          cb(res)
         }
       }
     )
@@ -269,7 +255,7 @@ class DeeBee{
     let  vls  = []
     fields.forEach(
       (fld,i)=>{
-        if(fld!='password'){
+        if(fld!=this._getUsersPasswField()){
           flds.push(fields[i])
           vls.push(vals[i])
         }else{
