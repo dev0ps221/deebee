@@ -43,7 +43,6 @@ class DeeBee{
 
   __db(){
     try{
-      console.log('creds are ', this.dbcreds)
       this.db = mysql.createConnection(this.dbcreds)
       this.db.connect(
         err=>{
@@ -51,14 +50,12 @@ class DeeBee{
             console.log(err?((resetDbErrs.includes(err))? (()=>{this.db.reconnect();return 'error encounteered, made a fix\nretrying connection to database'})():err):'connected to database')
           }catch(e){
             if(resetDbErrs.includes(e.code)) this._db()
-            console.log(resetDbErrs.includes(e.code))
           }
         }
       )
       return this.db;
     }catch(e){
       if(resetDbErrs.includes(e.code)) this._db()
-      console.log(resetDbErrs.includes(e.code))
     }
   }
 
@@ -187,8 +184,6 @@ class DeeBee{
   }
 
   ___login(user,pass,cb){
-    console.log('login action triggered on deebee')
-    console.log(this.___loginreq(this._getUsersTable(),user,pass))
     this.db.query(
       this.___loginreq(this._getUsersTable(),user,pass)
       ,cb
