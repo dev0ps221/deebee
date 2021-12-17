@@ -44,6 +44,15 @@ class DeeBee{
   __db(){
     try{
       this.db = mysql.createConnection(this.dbcreds)
+      this.db.on(
+        'error',err=>{
+          try{
+            console.log(err?((resetDbErrs.includes(err))? (()=>{this.db.reconnect();return 'error encounteered, made a fix\nretrying connection to database'})():err):'connected to database')
+          }catch(e){
+            if(resetDbErrs.includes(e.code)) this._db()
+          }
+        }
+      )
       this.db.connect(
         err=>{
           try{
