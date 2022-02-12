@@ -1,0 +1,31 @@
+{
+  "name": "@dev0ps221/deebee",
+  "version": "1.0.1",
+  "description": "talking with a mysql database made easier",
+  "main": "deebee.js",
+  "scripts": {
+    "test": "node deebee.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dev0ps221/deebee.git"
+  },
+  "keywords": [
+    "mysql",
+    "requests",
+    "sql",
+    "database",
+    "tektech",
+    "Seybatou",
+    "Mbengue"
+  ],
+  "author": "El Hadji Seybatou Mbengue (Tek-Tech)",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "bugs": {
+    "url": "https://github.com/dev0ps221/deebee/issues"
+  },
+  "homepage": "https://github.com/dev0ps221/deebee#readme",
+  "dependencies": {
+    "mysql": "^2.18.1"
+  }
+}
