@@ -1,6 +1,6 @@
 {
   "name": "@dev0ps221/deebee",
-  "version": "1.0.2-ears-r",
+  "version": "1.0.2-ears-r1",
   "description": "talking with a mysql database made easier",
   "main": "deebee.js",
   "scripts": {
