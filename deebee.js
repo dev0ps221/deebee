@@ -9,15 +9,10 @@ class DeeBee extends Ear{
     this[actionname] = callback
   }
 
-  _tbs(){
-    let tbs = [];
-    let act = this.__db().query(
-      "SHOW TABLES"
-    );
-    while(d = act.fetch()){
-      array_push(tbs,d[0]);
-    }
-    return tbs;
+  _tbs(cb){
+    this.__db().query(
+      "SHOW TABLES",cb
+    )
   }
 
   _setUsersTable(tbl = null){
@@ -37,6 +32,55 @@ class DeeBee extends Ear{
   }
   _getUsersLogField(){
     return this.usersLogField
+  }
+
+
+  __newFieldStr({name,type,attrs}){
+    let fieldstr = `${name} ${type}`
+    attrs.forEach(
+      attrname=>{
+        fieldstr = `${fieldstr},${attr}`
+      }
+    )
+    return fieldstr
+  }
+
+  __newFieldsStr(fields){
+    let fieldsStr = ``
+    fields.forEach(
+      field=>{
+        fieldsStr = `${fieldsStr}${this.__newFieldStr(field)}`
+      }
+    )
+    return fieldsStr
+  }
+
+  __newKeyStr({name,type,attrs}){
+    let keyStr = `${name} ${type}`
+    attrs.forEach(
+      attrname=>{
+        keyStr = `${keyStr},${attr}`
+      }
+    )
+    return keyStr
+  }
+
+  __newKeysStr(keys){
+    let keysStr = ``
+    keys.forEach(
+      key=>{
+        keysStr = `${keysStr}${this.__newkeyStr(key)}`
+      }
+    )
+    return keysStr
+  }
+
+  __newTableReq(name,fields,keys){
+    let reqStr = `CREATE TABLE ${name} (${this.__newFieldsStr(fields)} , ${this.__newKeysStr(keys)})`
+  }
+
+  __createTable(name,fields){
+    this.    
   }
 
   _db(){
