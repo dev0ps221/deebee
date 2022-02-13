@@ -281,6 +281,7 @@ class DeeBee extends Ear{
 
   }
   constructor(creds){
+    super()
     this.db = null;
     this.dbcreds = creds
     this._setUsersTable('_members')
