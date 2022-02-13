@@ -1,6 +1,6 @@
 {
   "name": "@dev0ps221/deebee",
-  "version": "1.0.1-things-r",
+  "version": "1.0.2-ears",
   "description": "talking with a mysql database made easier",
   "main": "deebee.js",
   "scripts": {
@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/dev0ps221/deebee#readme",
   "dependencies": {
+    "@tek-tech/ears": "^0.0.1-beta-r",
     "mysql": "^2.18.1"
   }
 }

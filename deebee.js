@@ -1,6 +1,8 @@
 let resetDbErrs = ['ECONNRESET','PROTOCOL_PACKETS_OUT_OF_ORDER']
 const mysql = require('mysql');
-class DeeBee{
+const {Ear} = require('@tek-tech/ears')
+
+class DeeBee extends Ear{
 
 
   _____registerAction(actionname,callback){
