@@ -5,6 +5,16 @@ const {Ear} = require('@tek-tech/ears')
 class DeeBee extends Ear{
 
 
+  static Builder = class {
+
+    static _field(name,type,attrs){
+      return {
+        name,type,attrs
+      }
+    }
+
+  }
+
   _____registerAction(actionname,callback){
     this[actionname] = callback
   }
