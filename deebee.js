@@ -12,6 +12,27 @@ class DeeBee extends Ear{
         name,type,attrs
       }
     }
+    static _keys(primary,foreign){
+      return {
+        primary,
+        foreign:this._foreignKeys(foreign)
+      }
+    }
+    static _foreignKeys(keys){
+      return keys.map(
+        key=>{
+          return this._foreignKey(key)
+        }
+      )
+    }
+    static _foreignKey([name,[field,update,remove]]){
+      return {
+        name,
+        references:{
+          field,update,remove
+        }
+      }
+    }
 
   }
 
@@ -89,13 +110,15 @@ class DeeBee extends Ear{
     if(keys.hasOwnProperty('primary') && keys.primary){
       keysStr = `${keysStr} ${this.__newKeyStr({name:`PRIMARY KEY (${keys.primary})`,attrs:[]})}`
     }
-    if(keys.hasOwnProperty('foreign') && keys.foreign.length){
-      keys.foreign.forEach(
-        key=>{
-          key.name = `,FOREIGN KEY ${key.name}`
-          keysStr = `${keysStr} ${this.__newKeyStr(key)}`
-        }
-      )
+    if(keys.hasOwnProperty('foreign') && keys.foreign!=undefined){
+      if(keys.foreign.length){
+        keys.foreign.forEach(
+          key=>{
+            key.name = `,FOREIGN KEY ${key.name}`
+            keysStr = `${keysStr} ${this.__newKeyStr(key)}`
+          }
+        )
+      }
     }
     return keysStr
   }
