@@ -33,60 +33,72 @@ class DeeBee extends Ear{
   _getUsersLogField(){
     return this.usersLogField
   }
-
-
   __newFieldStr({name,type,attrs}){
     let fieldstr = `${name} ${type}`
     attrs.forEach(
       attrname=>{
-        fieldstr = `${fieldstr},${attr}`
+        fieldstr = `${fieldstr} ${attrs}`
       }
     )
     return fieldstr
   }
-
   __newFieldsStr(fields){
     let fieldsStr = ``
     fields.forEach(
       field=>{
-        fieldsStr = `${fieldsStr}${this.__newFieldStr(field)}`
+        fieldsStr = `${fieldsStr == `` ? fieldsStr : `${fieldsStr},`}${this.__newFieldStr(field)}`
       }
     )
     return fieldsStr
   }
-
-  __newKeyStr({name,type,attrs}){
-    let keyStr = `${name} ${type}`
-    attrs.forEach(
-      attrname=>{
-        keyStr = `${keyStr},${attr}`
-      }
-    )
+  __newKeyStr({name,attrs,references}){
+    let keyStr = `${name}`
+    if(attrs){
+      attrs.forEach(
+        attrname=>{
+          keyStr = `${keyStr} ${attrs[attrname]}`
+        }
+      )
+    }
+    if(references){
+      references = [references]
+      references.forEach(
+        ({field,update,remove})=>{
+          keyStr = `${ keyStr} REFERENCES ${field} ${(()=>{
+            return update ? `ON UPDATE ${update}` : ""
+          })()} ${(()=>{
+            return remove ? `ON DELETE ${remove}` : ""
+          })()} `
+        }
+      )
+    }
     return keyStr
   }
-
   __newKeysStr(keys){
     let keysStr = ``
-    keys.forEach(
-      key=>{
-        keysStr = `${keysStr}${this.__newkeyStr(key)}`
-      }
-    )
+    if(keys.hasOwnProperty('primary') && keys.primary){
+      keysStr = `${keysStr} ${this.__newKeyStr({name:`PRIMARY KEY (${keys.primary})`,attrs:[]})}`
+    }
+    if(keys.hasOwnProperty('foreign') && keys.foreign.length){
+      keys.foreign.forEach(
+        key=>{
+          key.name = `,FOREIGN KEY ${key.name}`
+          keysStr = `${keysStr} ${this.__newKeyStr(key)}`
+        }
+      )
+    }
     return keysStr
   }
-
-  __newTableReq(name,fields,keys){
-    let reqStr = `CREATE TABLE ${name} (${this.__newFieldsStr(fields)} , ${this.__newKeysStr(keys)})`
+  __newTableReq({name,fields,keys}){
+    return `CREATE TABLE ${name} (${this.__newFieldsStr(fields)} , ${this.__newKeysStr(keys)})`
   }
-
-  __createTable(name,fields){
-    this.    
+  __createTable(table){
+    let req = this.__newTableReq(table)
+    console.log(req)
   }
-
   _db(){
-    return this.db;
+    return this.db
   }
-
   __db(){
     try{
       this.db = mysql.createConnection(this.dbcreds)
@@ -119,14 +131,12 @@ class DeeBee extends Ear{
       if(resetDbErrs.includes(e.code)) this._db()
     }
   }
-
   __reqArr(fields_,vals_,statement){
       for(let i = 0; i < (fields_.length) ; i++){
         statement.bindParam(":"+fields_[i],vals_[i]);
       }
       return statement;
   }
-
   __valsStr(vals_,bef='',aft=''){
     let vals="";
     for(let i = 0 ; i < (vals_.length) ;i++ ){
@@ -135,36 +145,28 @@ class DeeBee extends Ear{
 
     return vals;
   }
-
   __fvalStr(fields_=[],vals_=[],sep=',',bef='',aft='',vbef=""){
     let vals = "";
     for(let i = 0 ; i < (vals_.length) ;i++ ){
       vals+=(bef)+fields_[i]+"="+vbef+vals_[i]+(i+1 < (vals_.length) ? " "+sep+" " : "")+(aft);
     }
-
     return vals;
   }
-
   __condsStr(fields_=[],vals_=[],bef=""){
     return (fields_.length) ? " WHERE "+this.__fvalStr(fields_,bef?fields_:vals_,"AND","","",bef) : "";
   }
-
   __selectFrom(table_,fields_=[],conds=[[],[]]){
     return "SELECT "+this.__valsStr(fields_)+" FROM "+ table_ +((conds.length) ? this.__condsStr(conds[0],conds[1]) : "");
   }
-
   __delFrom(table_,conds=[[],[]]){
     return "DELETE  FROM "+ table_ + this.__condsStr(conds[0],conds[1],":");
   }
-
   __updtWhere(table_,fields_,vals_,conds=[[],[]]){
     return "UPDATE "+ table_ +" SET "+ this.__fvalStr(fields_,vals_,",") +this.__condsStr(conds[0],conds[1]);
   }
-
   __insertINTO(table,fields_=[],vals_=[]){
     return "INSERT INTO "+table+" ("+this.__valsStr(fields_)+") VALUES ("+this.__valsStr(vals_)+")";
   }
-
   _req(type_,table_,fields_=[],vals_=[],conds=[[],[]]){
     let req = "";
     switch (type_) {
@@ -184,10 +186,8 @@ class DeeBee extends Ear{
         // code...
         break;
     }
-
     return req;
   }
-
   _insertReq(table_,fields_,vals_,c){
     return this._req(
           'insert'
@@ -196,7 +196,6 @@ class DeeBee extends Ear{
           ,vals_
         )
   }
-
   _updateReq(table_,fields_,vals_,conds_){
     return this._req(
           'update'
@@ -206,7 +205,6 @@ class DeeBee extends Ear{
           ,conds_
         )
   }
-
   _delReq(table_,conds_,cb){
     return this._req(
       'delete',
@@ -214,7 +212,6 @@ class DeeBee extends Ear{
       conds_
     )
   }
-
   ___updateMember(fields_,vals_,id=null){
     let table=this._getUsersTable();
     let conds=[
@@ -226,7 +223,6 @@ class DeeBee extends Ear{
   ___loginreq(table,user,pass){
     return this._req("select",table,["id",this._getUsersLogField()],[],[[this._getUsersLogField(),this._getUsersPasswField()],["'"+user+"'",`password('${pass}')`]]);
   }
-
   ___delMember(name,id=null){
     let table=this._getUsersTable();
     let conds=[
@@ -235,22 +231,18 @@ class DeeBee extends Ear{
     ];
     return this._delReq(table,conds);
   }
-
-
   ___newNotification({member_id,concerned_id,type_}){
     let fields = ['member_id','concerned_id','type'];
     let vals   = [`${member_id}`,`${concerned_id}`,`'${type_}'`];
     let table  = '_notifications';
     return this._insertReq(table,fields,vals);
   }
-
   ___login(user,pass,cb){
     this.db.query(
       this.___loginreq(this._getUsersTable(),user,pass)
       ,cb
     )
   }
-
   ___all_members(cb){
     let req = this._req('select',this._getUsersTable(),['*']);
     this.db.query(req,(err,res)=>{
@@ -268,7 +260,6 @@ class DeeBee extends Ear{
       }
     )
   }
-
   ___search(name,cb){
     let req = this._req('select',this._getUsersTable(),['id','name','email','gender','birthday','star_sign','zodiac','planet'],null,[['name'],[`'${name}' OR name LIKE '%${name}%' OR email LIKE '%${name}%'`]])
     this.db.query(req,(err,res)=>{
@@ -283,7 +274,6 @@ class DeeBee extends Ear{
       }
     )
   }
-
   ___member(id,cb){
     let req = this._req('select',this._getUsersTable(),['id','name','email','gender','birthday','star_sign','zodiac','planet'],null,[['id'],[id]]);
     this.db.query(req,(err,res)=>{
@@ -294,7 +284,6 @@ class DeeBee extends Ear{
       }
     )
   }
-
   ___update(type_,data,id,cb){
 
     let fields = data[0]
@@ -316,13 +305,11 @@ class DeeBee extends Ear{
     )
     fields = flds
     vals   = vls
-
     if(type_=='member'){
       this.db.query(
         this.___updateMember(fields,vals,id),cb
       )
     }
-
   }
   constructor(creds){
     super()
