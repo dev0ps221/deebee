@@ -49,7 +49,6 @@ class DeeBee{
           try{
             console.log(err?((resetDbErrs.includes(err))? (()=>{this.db.reconnect();return 'error encounteered, made a fix\nretrying connection to database'})():err):(()=>{
               this.ready = 1
-              console.log(this)
               return 'connected to database'
             })())
           }catch(e){
@@ -62,7 +61,6 @@ class DeeBee{
           try{
             console.log(err?((resetDbErrs.includes(err))? (()=>{this.db.reconnect();return 'error encounteered, made a fix\nretrying connection to database'})():err):(()=>{
               this.ready = 1
-              console.log(this)
               return 'connected to database'
             })())
           }catch(e){
