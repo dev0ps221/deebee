@@ -6,7 +6,17 @@ class DeeBee extends Ear{
 
 
   static Builder = class {
-
+    static _table(name,fields,keys){
+      return {
+        name
+        ,fields:fields.map(
+          field=>{
+            return this._field(...field)
+          }
+        )
+        ,keys:this._keys(...keys)
+      }
+    }
     static _field(name,type,attrs){
       return {
         name,type,attrs
@@ -33,7 +43,6 @@ class DeeBee extends Ear{
         }
       }
     }
-
   }
 
   _____registerAction(actionname,callback){
@@ -41,8 +50,23 @@ class DeeBee extends Ear{
   }
 
   _tbs(cb){
-    this.__db().query(
-      "SHOW TABLES",cb
+    this._db().query(
+      `SHOW TABLES`,cb
+    )
+  }
+  _tb_exists(name,cb){
+    let exists = null
+    this._tbs(
+      (e,tbs)=>{
+        
+        if(e) cb(exists)
+        else  tbs.length ? tbs.forEach(
+          (table,idx)=>{
+            if(table[`Tables_in_${this.dbname}`]==name) exists = table[`Tables_in_${this.dbname}`]
+            if(idx+1==tbs.length)cb(exists)
+          }
+        ) : cb(exists)
+      }
     )
   }
 
@@ -68,7 +92,7 @@ class DeeBee extends Ear{
     let fieldstr = `${name} ${type}`
     attrs.forEach(
       attrname=>{
-        fieldstr = `${fieldstr} ${attrs}`
+        fieldstr = `${fieldstr} ${attrname}`
       }
     )
     return fieldstr
@@ -123,45 +147,150 @@ class DeeBee extends Ear{
     return keysStr
   }
   __newTableReq({name,fields,keys}){
-    return `CREATE TABLE ${name} (${this.__newFieldsStr(fields)} , ${this.__newKeysStr(keys)})`
+    return `CREATE TABLE IF NOT EXISTS ${name} (${this.__newFieldsStr(fields)} , ${this.__newKeysStr(keys)})`
   }
-  __createTable(table){
-    let req = this.__newTableReq(table)
-    console.log(req)
+  __createTable(table,cb){
+    if(table){
+      let req = this.__newTableReq(table)
+      this._db().query(
+        req,cb
+      )
+    }else{
+      cb(`provided argument ${table} is incorrect`,null)
+    }
+  }
+  __createDataBase(name,tables,cb){
+    let req = `create DATABASE IF NOT EXISTS ${name}`
+    this._db().query(
+      req,(err,res)=>{
+        if(err){
+          cb(err,res)
+        }else{
+          if(res){
+            let errs = []
+            let ress = []
+            if(tables.length){
+              tables.forEach(
+                (table,idx)=>{
+                  this.__createTable(table,(e,r)=>{
+                    errs.push(e)
+                    ress.push(r)
+                    if(idx+1==tables.length){
+                      cb(errs,ress,tables.length)
+                    }
+                  })
+                }
+              )
+              return
+            }else{
+              cb([err],[res])
+            }
+          }else{
+            cb(['erreur non comprise||non understood error'],[res])
+          }
+        }
+      }
+    )
+  }
+  __dropTable(table,cb){
+    let req = `DROP TABLE ${table}`
+    this._db().query(
+      req,cb
+    )
   }
   _db(){
     return this.db
   }
   __db(){
     try{
+      var deebee = this.dbcreds.database
       this.db = mysql.createConnection(this.dbcreds)
       this.db.on(
         'error',err=>{
-          try{
-            console.log(err?((resetDbErrs.includes(err))? (()=>{this.db.reconnect();return 'error encounteered, made a fix\nretrying connection to database'})():err):(()=>{
-              this.ready = 1
-              return 'connected to database'
-            })())
-          }catch(e){
-            if(resetDbErrs.includes(e.code)) this._db()
-          }
+          this.handleConnectErr(err,deebee)    
         }
       )
       this.db.connect(
         err=>{
           try{
-            console.log(err?((resetDbErrs.includes(err))? (()=>{this.db.reconnect();return 'error encounteered, made a fix\nretrying connection to database'})():err):(()=>{
-              this.ready = 1
-              return 'connected to database'
-            })())
+            if(err){
+              if(resetDbErrs.includes(err)){
+                console.log('error encounteered, made a fix\nretrying connection to database')
+              }else{
+                this.handleConnectErr(err,deebee)
+              }
+            }else{
+              this.db.query(
+                `use ${deebee}`,(e,r)=>{
+                  if(e){
+                    this.handleConnectErr(e,deebee)
+                  }if(r){
+                    console.log('connected to mysql database')
+                    this.dbcreds.database = deebee
+                    this._db().config.database=deebee
+                    this.setupTables()
+                  }
+                }
+              )
+              console.log('connected to mysql server')
+            }
           }catch(e){
             if(resetDbErrs.includes(e.code)) this._db()
+            this.handleConnectErr(e,deebee)
           }
         }
       )
       return this.db;
     }catch(e){
       if(resetDbErrs.includes(e.code)) this._db()
+      this.handleConnectErr(e,deebee)
+    }
+  }
+  handleConnectErr(err,deebee){
+    if(err.sqlMessage==`Unknown database '${deebee}'`){
+      this.dbcreds.database = deebee
+      deebee = this.dbname
+      this.dbcreds.database = ''
+      this.db = mysql.createConnection(this.dbcreds)
+      this.db.connect(
+        err=>{
+          if(err)this.handleConnectErr(err)
+          else{
+            this.dbcreds.database = deebee
+            this.__createDataBase(
+              this.dbcreds.database,[],((e,r,tablessize)=>{
+                  console.log(e,r)
+                  let goterr=0
+                  if(e.length){
+                    e.forEach(
+                      err=>{
+                        if(err){
+                          console.log(err)
+                          goterr++
+                        }
+                      }
+                    )
+                  }
+                  if(goterr==0){
+                    if(r && r.length){
+                      if(tablessize && (tablessize == r.length)){
+                        this.__db()
+                      }else{
+                        this.__db()
+                      }
+                    }else{
+                      this.__db()
+                    }
+                  }
+                }
+              )
+            )
+          }
+        }
+      )
+      console.log(`database ${deebee} not found creating it`)
+    }else{
+      console.log(err.sqlMessage)
     }
   }
   __reqArr(fields_,vals_,statement){
@@ -344,8 +473,49 @@ class DeeBee extends Ear{
       )
     }
   }
-  constructor(creds){
+  setupTables(){
+    if(this.configtables.length){
+      let errs = []
+      let res  = []
+      const final = ()=>{
+        if(errs.length){
+          console.log('some errors occured when setting up the database')
+          console.log(errs.join("\n"))
+        }else{
+          console.log('DeeBee is Ready')
+          this.ready = 1
+        }
+      }
+      this.configtables.forEach(
+        (table,idx)=>{
+          let made = 0
+          this._tb_exists(
+            table.name,tbl=>{
+              if(tbl){
+                made++
+                res.push(tbl)
+                if(made==this.configtables.length)final()
+              }else{
+                this.__createTable(table,(e,r)=>{
+                  made++
+                  if(e)errs.push(e)
+                  res.push(r)
+                  if(made==this.configtables.length)final()
+                })
+              }
+            }
+          )
+        }
+      )
+    }else{
+      console.log('DeeBee is Ready')
+      this.ready = 1
+    }
+  }
+  constructor(creds,tables=[]){
     super()
+    this.configtables = tables
+    this.dbname = creds.database
     this.db = null;
     this.dbcreds = creds
     this._setUsersTable('_members')
