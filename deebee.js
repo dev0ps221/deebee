@@ -290,7 +290,7 @@ class DeeBee extends Ear{
       )
       console.log(`database ${deebee} not found creating it`)
     }else{
-      console.log(err.sqlMessage)
+      console.log(err.hasOwnProperty('sqlMessage')?err.sqlMessage:err)
     }
   }
   __reqArr(fields_,vals_,statement){
