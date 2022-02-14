@@ -291,6 +291,7 @@ class DeeBee extends Ear{
       console.log(`database ${deebee} not found creating it`)
     }else{
       console.log(err.hasOwnProperty('sqlMessage')?err.sqlMessage:err)
+      this.__db()
     }
   }
   __reqArr(fields_,vals_,statement){
@@ -474,6 +475,7 @@ class DeeBee extends Ear{
     }
   }
   setupTables(){
+    
     if(this.configtables.length){
       let errs = []
       let res  = []
@@ -486,9 +488,9 @@ class DeeBee extends Ear{
           this.ready = 1
         }
       }
+      let made = 0
       this.configtables.forEach(
         (table,idx)=>{
-          let made = 0
           this._tb_exists(
             table.name,tbl=>{
               if(tbl){
