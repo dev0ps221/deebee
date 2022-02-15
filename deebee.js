@@ -85,8 +85,26 @@ class DeeBee extends Ear{
   _setUsersLogField(field='name'){
     this.usersLogField = field
   }
-  _getUsersLogField(){
-    return this.usersLogField
+  _getAdminsLogField(){
+    return this.adminsLogField
+  }
+  _setAdminsTable(tbl = null){
+    this.adminsTable = tbl
+  }
+  _setAdminsPasswField(field='password'){
+    this.AdminsPasswField = field
+  }
+  _getAdminsPasswField(){
+    return this.AdminsPasswField
+  }
+  _getAdminsTable(tbl){
+    return this.adminsTable
+  }
+  _setAdminsLogField(field='name'){
+    this.adminsLogField = field
+  }
+  _getAdminsLogField(){
+    return this.adminsLogField
   }
   __newFieldStr({name,type,attrs}){
     let fieldstr = `${name} ${type}`
