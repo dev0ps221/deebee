@@ -85,6 +85,9 @@ class DeeBee extends Ear{
   _setUsersLogField(field='name'){
     this.usersLogField = field
   }
+  _getUsersLogField(){
+    return this.usersLogField
+  }
   _getAdminsLogField(){
     return this.adminsLogField
   }

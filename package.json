@@ -1,5 +1,5 @@
 {
-  "name": "@dev0ps221/deebee",
+  "name": "@tek-tech/deebee",
   "version": "1.0.3-tee-r2",
   "description": "talking with a mysql database made easier",
   "main": "deebee.js",
