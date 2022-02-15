@@ -90,7 +90,7 @@ class DeeBee extends Ear{
   }
   __newFieldStr({name,type,attrs}){
     let fieldstr = `${name} ${type}`
-    attrs.forEach(
+    if(attrs&&attrs.length)attrs.forEach(
       attrname=>{
         fieldstr = `${fieldstr} ${attrname}`
       }
