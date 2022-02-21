@@ -45,6 +45,10 @@ class DeeBee extends Ear{
     }
   }
 
+  builder(){
+    return DeeBee.Builder
+  }
+
   _____registerAction(actionname,callback){
     this[actionname] = callback
   }
