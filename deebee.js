@@ -541,10 +541,10 @@ class DeeBee extends Ear{
     }
   }
   constructor(creds,tables=[],type='mysql'){
-    super()
     if(type=='pg'){
       return new PGDeeBee(creds,tables)
     }
+    super()
     this.configtables = tables
     this.dbname = creds.database
     this.db = null;

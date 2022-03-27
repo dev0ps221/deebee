@@ -27,6 +27,7 @@
   "homepage": "https://github.com/dev0ps221/deebee#readme",
   "dependencies": {
     "@tek-tech/ears": "^0.0.1-beta-r",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "pg": "^8.7.3"
   }
 }
