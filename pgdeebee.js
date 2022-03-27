@@ -1,9 +1,9 @@
+let instances = [] 
+const {Pool} = require('pg')
 let resetDbErrs = ['ECONNRESET','PROTOCOL_PACKETS_OUT_OF_ORDER']
-const mysql = require('mysql');
 const {Ear} = require('@tek-tech/ears')
-const PGDeeBee = require('./pgdeebee')
 
-class DeeBee extends Ear{
+class PGDeeBee extends Ear{
 
 
   static Builder = class {
@@ -56,18 +56,22 @@ class DeeBee extends Ear{
 
   _tbs(cb){
     this._db().query(
-      `SHOW TABLES`,cb
+      `select * from pg_catalog.pg_tables where schemaname = '${this._db().database}'`,(e,r)=>{
+        e = e ? e.stack : e
+        r = r ? r.rows : r
+        cb(e,r)
+      }
+      // `select * from information_schema.tables`,cb
     )
   }
   _tb_exists(name,cb){
     let exists = null
     this._tbs(
       (e,tbs)=>{
-        
         if(e) cb(exists)
         else  tbs.length ? tbs.forEach(
           (table,idx)=>{
-            if(table[`Tables_in_${this.dbname}`]==name) exists = table[`Tables_in_${this.dbname}`]
+            if(table['tablename']==name) exists = table[`Tables_in_${this.dbname}`]
             if(idx+1==tbs.length)cb(exists)
           }
         ) : cb(exists)
@@ -186,9 +190,11 @@ class DeeBee extends Ear{
     }
   }
   __createDataBase(name,tables,cb){
-    let req = `create DATABASE IF NOT EXISTS ${name}`
+    let req = `create DATABASE ${name}`
     this._db().query(
       req,(err,res)=>{
+        err = err ? err.stack : err
+        res = res ? res.rows : res
         if(err){
           cb(err,res)
         }else{
@@ -230,7 +236,7 @@ class DeeBee extends Ear{
   __db(){
     try{
       var deebee = this.dbcreds.database
-      this.db = mysql.createConnection(this.dbcreds)
+      this.db = new Pool(this.dbcreds)
       this.db.on(
         'error',err=>{
           this.handleConnectErr(err,deebee)    
@@ -246,19 +252,11 @@ class DeeBee extends Ear{
                 this.handleConnectErr(err,deebee)
               }
             }else{
-              this.db.query(
-                `use ${deebee}`,(e,r)=>{
-                  if(e){
-                    this.handleConnectErr(e,deebee)
-                  }if(r){
-                    console.log('connected to mysql database')
-                    this.dbcreds.database = deebee
-                    this._db().config.database=deebee
-                    this.setupTables()
-                  }
-                }
-              )
-              console.log('connected to mysql server')
+              console.log('connected to pgsql database')
+              this.dbcreds.database = deebee
+              this._db().database=deebee
+              this.setupTables()
+              console.log('connected to pgsql server')
             }
           }catch(e){
             if(resetDbErrs.includes(e.code)) this._db()
@@ -273,11 +271,12 @@ class DeeBee extends Ear{
     }
   }
   handleConnectErr(err,deebee){
-    if(err.sqlMessage==`Unknown database '${deebee}'`){
+    if(err.toString().match('too many clients already')) return
+    if(err.toString().match(`database "${deebee}" does not exist`)){
       this.dbcreds.database = deebee
       deebee = this.dbname
       this.dbcreds.database = ''
-      this.db = mysql.createConnection(this.dbcreds)
+      this.db = new Pool(this.dbcreds)
       this.db.connect(
         err=>{
           if(err)this.handleConnectErr(err)
@@ -435,6 +434,8 @@ class DeeBee extends Ear{
   ___all_members(cb){
     let req = this._req('select',this._getUsersTable(),['*']);
     this.db.query(req,(err,res)=>{
+      err = err ? err.stack : err
+      res = res ? res.rows : res
         if(res&&res.length){
           let r = []
           res.forEach(
@@ -452,6 +453,8 @@ class DeeBee extends Ear{
   ___search(name,cb){
     let req = this._req('select',this._getUsersTable(),['id','name','email','gender','birthday','star_sign','zodiac','planet'],null,[['name'],[`'${name}' OR name LIKE '%${name}%' OR email LIKE '%${name}%'`]])
     this.db.query(req,(err,res)=>{
+      err = err ? err.stack : err
+      res = res ? res.rows : res
         if(res && res.length){
           res = res.map(match=>{
             if(match.name.match(name)) match.matchedBy = 'name'
@@ -466,6 +469,8 @@ class DeeBee extends Ear{
   ___member(id,cb){
     let req = this._req('select',this._getUsersTable(),['id','name','email','gender','birthday','star_sign','zodiac','planet'],null,[['id'],[id]]);
     this.db.query(req,(err,res)=>{
+      err = err ? err.stack : err
+      res = res ? res.rows : res
         if(err)cb(err,null)
         else{
           cb(res)
@@ -540,11 +545,8 @@ class DeeBee extends Ear{
       this.ready = 1
     }
   }
-  constructor(creds,tables=[],type='mysql'){
+  constructor(creds,tables=[]){
     super()
-    if(type=='pg'){
-      return new PGDeeBee(creds,tables)
-    }
     this.configtables = tables
     this.dbname = creds.database
     this.db = null;
@@ -554,4 +556,12 @@ class DeeBee extends Ear{
   }
 
 }
-module.exports = DeeBee
+function cleanInstances(){
+  instances.map(
+    instance=>{
+      instance.disconnect()
+    }
+  )
+}
+module.exports = PGDeeBee
+process.on('exit',cleanInstances.bind(null, {exit:true}))
