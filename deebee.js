@@ -1,7 +1,9 @@
+let instances = [] 
+const {Pool} = require('pg')
 let resetDbErrs = ['ECONNRESET','PROTOCOL_PACKETS_OUT_OF_ORDER']
 const mysql = require('mysql');
 const {Ear} = require('@tek-tech/ears')
-const PGDeeBee = require('./pgdeebee')
+// const PGDeeBee = require('./pgdeebee')
 
 class DeeBee extends Ear{
 
@@ -554,4 +556,128 @@ class DeeBee extends Ear{
   }
 
 }
+
+
+class PGDeeBee extends DeeBee{
+
+
+  _tbs(cb){
+    this._db().query(
+      `select * from pg_catalog.pg_tables where schemaname = '${this._db().database}'`,(e,r)=>{
+        e = e ? e.stack : e
+        r = r ? r.rows : r
+        cb(e,r)
+      }
+      // `select * from information_schema.tables`,cb
+    )
+  }
+  __db(){
+    try{
+      var deebee = this.dbcreds.database
+      this.db = new Pool(this.dbcreds)
+      this.db.on(
+        'error',err=>{
+          this.handleConnectErr(err,deebee)    
+        }
+      )
+      this.db.connect(
+        err=>{
+          try{
+            if(err){
+              if(resetDbErrs.includes(err)){
+                console.log('error encounteered, made a fix\nretrying connection to database')
+              }else{
+                this.handleConnectErr(err,deebee)
+              }
+            }else{
+              console.log('connected to pgsql database')
+              this.dbcreds.database = deebee
+              this._db().database=deebee
+              this.setupTables()
+              console.log('connected to pgsql server')
+            }
+          }catch(e){
+            if(resetDbErrs.includes(e.code)) this._db()
+            this.handleConnectErr(e,deebee)
+          }
+        }
+      )
+      return this.db;
+    }catch(e){
+      if(resetDbErrs.includes(e.code)) this._db()
+      this.handleConnectErr(e,deebee)
+    }
+  }
+  handleConnectErr(err,deebee){
+    if(err.toString().match('too many clients already')) return
+    if(err.toString().match(`database "${deebee}" does not exist`)){
+      this.dbcreds.database = deebee
+      deebee = this.dbname
+      this.dbcreds.database = ''
+      this.db = new Pool(this.dbcreds)
+      this.db.connect(
+        err=>{
+          if(err)this.handleConnectErr(err)
+          else{
+            this.dbcreds.database = deebee
+            this.__createDataBase(
+              this.dbcreds.database,[],((e,r,tablessize)=>{
+                  console.log(e,r)
+                  let goterr=0
+                  if(e.length){
+                    e.forEach(
+                      err=>{
+                        if(err){
+                          console.log(err)
+                          goterr++
+                        }
+                      }
+                    )
+                  }
+                  if(goterr==0){
+                    if(r && r.length){
+                      if(tablessize && (tablessize == r.length)){
+                        this.__db()
+                      }else{
+                        this.__db()
+                      }
+                    }else{
+                      this.__db()
+                    }
+                  }
+                }
+              )
+            )
+          }
+        }
+      )
+      console.log(`database ${deebee} not found creating it`)
+    }else{
+      console.log(err.hasOwnProperty('sqlMessage')?err.sqlMessage:err)
+      this.__db()
+    }
+  }
+  constructor(creds,tables=[]){
+    console.log('got these kind of creds ',creds)
+    super(creds,tables)
+    this.configtables = tables
+    this.dbname = creds.database
+    this.db = null;
+    this.dbcreds = creds
+    this._setUsersTable('_members')
+    this.__db()
+  }
+
+}
+function cleanInstances(){
+  instances.map(
+    instance=>{
+      instance.disconnect()
+    }
+  )
+}
+process.on('exit',cleanInstances.bind(null, {exit:true}))
+
+
+
 module.exports = DeeBee
