@@ -7,6 +7,9 @@ const {Ear} = require('@tek-tech/ears')
 
 class DeeBee extends Ear{
 
+  static getPGClass(){
+    return PGDeeBee 
+  }
 
   static Builder = class {
     static _table(name,fields,keys){
@@ -542,6 +545,15 @@ class DeeBee extends Ear{
       this.ready = 1
     }
   }
+  configureActions(...actions){
+      actions.forEach(
+          ({name,cb})=>{
+              this._____registerAction(
+                  name,cb
+              )
+          }
+      )
+  }
   constructor(creds,tables=[],type='mysql',dontconnect=false){
     super()
     if(type=='pg'){
@@ -659,7 +671,6 @@ class PGDeeBee extends DeeBee{
     }
   }
   constructor(creds,tables=[]){
-    console.log('got these kind of creds ',creds)
     super(creds,tables)
     this.configtables = tables
     this.dbname = creds.database
