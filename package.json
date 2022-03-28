@@ -1,6 +1,6 @@
 {
   "name": "@tek-tech/deebee",
-  "version": "1.0.4-pg-0.1-beta",
+  "version": "1.0.4-pg-0.1-beta-0.0.1",
   "description": "talking with a mysql database made easier",
   "main": "deebee.js",
   "scripts": {
