@@ -542,7 +542,7 @@ class DeeBee extends Ear{
       this.ready = 1
     }
   }
-  constructor(creds,tables=[],type='mysql'){
+  constructor(creds,tables=[],type='mysql',dontconnect=false){
     if(type=='pg'){
       return new PGDeeBee(creds,tables)
     }
@@ -552,6 +552,7 @@ class DeeBee extends Ear{
     this.db = null;
     this.dbcreds = creds
     this._setUsersTable('_members')
+    if(dontconnect) return this
     this.__db()
   }
 
