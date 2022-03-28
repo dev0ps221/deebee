@@ -671,7 +671,7 @@ class PGDeeBee extends DeeBee{
     }
   }
   constructor(creds,tables=[]){
-    super(creds,tables)
+    super(creds,tables,'pg','pg')
     this.configtables = tables
     this.dbname = creds.database
     this.db = null;
