@@ -11,13 +11,6 @@ class DeeBee extends Ear{
     return PGDeeBee 
   }
 
-  filterIt(str){
-    str = str.replaceAll(/'/ig,"\'")
-    str = str.replaceAll(/`/ig,"\`")
-    str = str.replaceAll(/"/ig,'\"')
-    return str
-  }
-
   static Builder = class {
     static _table(name,fields,keys){
       return {
@@ -56,6 +49,20 @@ class DeeBee extends Ear{
         }
       }
     }
+  }
+
+
+  filterIt(str){
+    if(str){
+
+      str = str.split("").map(
+        char=>{
+          return char == "'" ? "\\'" : char == "`" ? "\\`" : char == '"' ? '\\"' : char
+        }
+      ).join("")
+    
+    }
+    return str
   }
 
   builder(){
