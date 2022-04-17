@@ -1,6 +1,6 @@
 {
   "name": "@tek-tech/deebee",
-  "version": "1.0.5-rocks-0.1-beta",
+  "version": "1.0.5-rocks-0.2-beta",
   "description": "talking with a mysql|postgres database made easier",
   "main": "deebee.js",
   "scripts": {

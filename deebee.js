@@ -684,6 +684,19 @@ class PGDeeBee extends DeeBee{
       this.__db()
     }
   }
+
+  filterIt(str){
+    if(str){
+
+      str = str.split("").map(
+        char=>{
+          return char == "'" ? "\\'" : char == "`" ? "\\`" : char == '"' ? '\\"' : char
+        }
+      ).join("")
+    
+    }
+    return str
+  }
   constructor(creds,tables=[]){
     super(creds,tables)
     this.configtables = tables
