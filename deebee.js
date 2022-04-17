@@ -11,6 +11,13 @@ class DeeBee extends Ear{
     return PGDeeBee 
   }
 
+  filterIt(str){
+    str = str.replaceAll(/'/ig,"\'")
+    str = str.replaceAll(/`/ig,"\`")
+    str = str.replaceAll(/"/ig,'\"')
+    return str
+  }
+
   static Builder = class {
     static _table(name,fields,keys){
       return {
@@ -671,7 +678,7 @@ class PGDeeBee extends DeeBee{
     }
   }
   constructor(creds,tables=[]){
-    super(creds,tables,null,'pg')
+    super(creds,tables)
     this.configtables = tables
     this.dbname = creds.database
     this.db = null;
