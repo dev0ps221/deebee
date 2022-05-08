@@ -29,3 +29,15 @@ connection.whenReady(
     }
 )
 ``` 
+
+###execute a basic sql request | executer une requete
+```
+const exec = connection._db();
+exec.query(`select * table name`,(error,rows)=>{
+   if(error){
+      //do something with the error message | on traite l'erreur
+   }else{
+      //do something with the result | on traite le resultat(rows; stores an array|contient un array)
+   }
+});
+```
