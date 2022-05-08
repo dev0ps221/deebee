@@ -29,8 +29,8 @@ mysql requests made easier for nodejs
 > >const connection = new DeeBee(credentials);
 > >connection.whenReady(
 >    >()=>{
->      >//do something with the connection
->      >//faire quelque chose avec la connexion
+>      > //do something with the connection
+>      > //faire quelque chose avec la connexion
 >    >}
 > >)
 > >``` 
@@ -42,9 +42,9 @@ mysql requests made easier for nodejs
 > >const exec = connection._db();
 > >exec.query(`select * table name`,(error,rows)=>{
 >   >if(error){
->      >//do something with the error message | on traite l'erreur
+>      > //do something with the error message | on traite l'erreur
 >   >}else{
->      >//do something with the result | on traite le resultat(rows; stores an array|contient un array)
+>      > //do something with the result | on traite le resultat(rows; stores an array|contient un array)
 >   >}
 > >});
 > >```
