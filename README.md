@@ -4,9 +4,9 @@ mysql requests made easier for nodejs
 ## example usage
 
 ### Installation
->```
->npm i @tek-tech/deebee
->```
+ >```
+ >npm i @tek-tech/deebee
+ >```
 
 
 
@@ -37,7 +37,7 @@ mysql requests made easier for nodejs
 
 
 
-###execute a basic sql request | executer une requete
+### execute a basic sql request | executer une simple requete
 >```
 >const exec = connection._db();
 >exec.query(`select * table name`,(error,rows)=>{
