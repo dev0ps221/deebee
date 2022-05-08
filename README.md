@@ -2,16 +2,21 @@
 mysql requests made easier for nodejs
 
 ## example usage
-
+...
 ### Installation
 ```
 npm i @tek-tech/deebee
 ```
+...
 
+...
 ### Initialisation
 ```
 const DeeBee = require('@tek-tech/deebee');
 ```
+...
+
+...
 ### simple connection to a mysql database || connexion simple a une base de donnee mysql
 ```
 const DeeBee = require('@tek-tech/deebee');
@@ -29,7 +34,9 @@ connection.whenReady(
     }
 )
 ``` 
+...
 
+...
 ###execute a basic sql request | executer une requete
 ```
 const exec = connection._db();
@@ -41,3 +48,4 @@ exec.query(`select * table name`,(error,rows)=>{
    }
 });
 ```
+...
