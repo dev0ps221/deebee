@@ -42,9 +42,9 @@ mysql requests made easier for nodejs
 > >const exec = connection._db();
 > >exec.query(`select * table name`,(error,rows)=>{
 >   >if(error){
->      > //do something with the error message | on traite l'erreur
+> >    //do something with the error message | on traite l'erreur
 >   >}else{
->      > //do something with the result | on traite le resultat(rows; stores an array|contient un array)
+> >    //do something with the result | on traite le resultat(rows; stores an array|contient un array)
 >   >}
 > >});
 > >```
