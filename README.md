@@ -4,9 +4,9 @@ mysql requests made easier for nodejs
 ## example usage
 
 ### Installation
- >```
- >npm i @tek-tech/deebee
- >```
+> >```
+> >npm i @tek-tech/deebee
+> >```
 
 
 
