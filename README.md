@@ -28,10 +28,10 @@ mysql requests made easier for nodejs
 >>};
 > >const connection = new DeeBee(credentials);
 > >connection.whenReady(
->    >()=>{
->      > //do something with the connection
->      > //faire quelque chose avec la connexion
->    >}
+> >   ()=>{
+> >       //do something with the connection
+> >       //faire quelque chose avec la connexion
+> >   }
 > >)
 > >``` 
 
