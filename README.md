@@ -3,16 +3,16 @@ mysql requests made easier for nodejs
 
 #example usage
 
-##Installation
+## Installation
 ```
 npm i @tek-tech/deebee
 ```
 
-##Initialisation
+## Initialisation
 ```
 const DeeBee = require('@tek-tech/deebee');
 ```
-##simple connection to a mysql database || connexion simple a une base de donnee mysql
+## simple connection to a mysql database || connexion simple a une base de donnee mysql
 ```
 const DeeBee = require('@tek-tech/deebee');
 const credentials = {
@@ -28,4 +28,4 @@ connection.whenReady(
       //faire quelque chose avec la connexion
     }
 )
-```
+``` 
