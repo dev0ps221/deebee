@@ -49,4 +49,4 @@ mysql requests made easier for nodejs
 > >});
 > >```
 [![Made-In-Senegal](https://github.com/GalsenDev221/made.in.senegal/blob/master/assets/badge.svg)](https://github.com/GalsenDev221/made.in.senegal)
-
+[![](https://data.jsdelivr.com/v1/package/npm/@tek-tech/deebee/badge)](https://www.jsdelivr.com/package/npm/@tek-tech/deebee)
