@@ -1,5 +1,6 @@
 let instances = [] 
 const {Pool} = require('pg')
+let connectErrs = 0
 let resetDbErrs = ['ECONNRESET','PROTOCOL_PACKETS_OUT_OF_ORDER']
 const mysql = require('mysql');
 const {Ear} = require('@tek-tech/ears')
@@ -617,7 +618,7 @@ class PGDeeBee extends DeeBee{
                 this.handleConnectErr(err,deebee)
               }
             }else{
-              console.log('connected to pgsql database')
+              console.log('connected to pgsql database') 
               this.dbcreds.database = deebee
               this._db().database=deebee
               this.setupTables()
@@ -636,16 +637,23 @@ class PGDeeBee extends DeeBee{
     }
   }
   handleConnectErr(err,deebee){
-    if(err.toString().match('too many clients already')) return
-    if(err.toString().match(`database "${deebee}" does not exist`)){
+    connectErrs++
+    if(err.sqlMessage==`Unknown database '${deebee}'`){
       this.dbcreds.database = deebee
       deebee = this.dbname
       this.dbcreds.database = ''
-      this.db = new Pool(this.dbcreds)
+      this.db = mysql.createConnection(this.dbcreds)
       this.db.connect(
         err=>{
-          if(err)this.handleConnectErr(err)
-          else{
+          if(err){
+            setTimeout(
+              (err)=>{
+                this.handleConnectErr(err)
+              },60000 * ((connectErrs < 5) ? 5 : 30)
+              ,err
+            )
+          
+          }else{
             this.dbcreds.database = deebee
             this.__createDataBase(
               this.dbcreds.database,[],((e,r,tablessize)=>{
@@ -684,7 +692,6 @@ class PGDeeBee extends DeeBee{
       this.__db()
     }
   }
-
   filterIt(str){
     if(str){
 
